@@ -20,6 +20,7 @@ public class APITests {
     @Before
     public void setUp(Scenario scenario){
         baseUrl = "https://reqres.in";
+
         this.scenario = scenario;
     }
 
