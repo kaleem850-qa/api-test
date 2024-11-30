@@ -56,18 +56,19 @@ public class APITests {
 
     @After
     public void tearDown(Scenario scenario){
-        String[] parts = scenario.getUri().toString().split("/");
-        String featureFile = parts[parts.length - 1];
-        String featureName = featureFile.replace(".feature", "");
-
-        if (featureName.contains("users")) {
+        String scenarioName = scenario.getName();
+        System.out.println("Scenario Name is: " +scenarioName);
+        if (scenarioName.contains("user") && scenario.getName().contains("business")) {
             mongoDBConnection.deleteRecord("users", email);
             System.out.println("User is deleted successfully: " + email);
-        }
-
-        if (featureName.contains("businesses")){
             mongoDBConnection.deleteRecord("businesses", businessName);
             System.out.println("Business is deleted successfully: "  + businessName);
+        } else if (scenarioName.contains("business")){
+            mongoDBConnection.deleteRecord("businesses", businessName);
+            System.out.println("Business is deleted successfully: "  + businessName);
+        } else if (scenarioName.contains("user")){
+            mongoDBConnection.deleteRecord("users", email);
+            System.out.println("User is deleted successfully: "  + email);
         }
     }
 

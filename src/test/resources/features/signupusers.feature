@@ -1,4 +1,4 @@
-Feature: In order to consume API for users
+Feature: In order to consume API for signup users
 
   Scenario:
     Given user has an endpoint "/auth/sign-up"
