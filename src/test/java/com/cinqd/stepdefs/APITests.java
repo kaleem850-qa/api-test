@@ -50,7 +50,7 @@ public class APITests {
     public void setUp(Scenario scenario) {
         email = "test_" + UUID.randomUUID() + "@cinqd.com";
 
-        request = RestAssured.given();
+        request = RestAssured.given().log().all();
         this.scenario = scenario;
     }
 
@@ -109,7 +109,7 @@ public class APITests {
     @When("user makes a get request")
     public void userMakesAGetRequest() {
         response = request.get(uri);
-        response.prettyPrint();
+        response.then().log().all();
         scenario.attach(response.then().extract().body().asPrettyString(), "text/plain", "response");
     }
 
@@ -121,14 +121,14 @@ public class APITests {
     @When("user makes a post request")
     public void userMakesAPostRequest() {
         response = request.post(uri);
-        response.prettyPrint();
+        response.then().log().all();
         scenario.attach(response.then().extract().body().asPrettyString(), "text/plain", "response");
     }
 
     @When("user makes a put request")
     public void userMakesAPutRequest() {
         response = request.body(requestBody).put(uri);
-        response.prettyPrint();
+        response.then().log().all();
         scenario.attach(response.then().extract().body().asPrettyString(), "text/plain", "response");
     }
 
@@ -140,7 +140,7 @@ public class APITests {
             uri = userBaseUrl + endPoint;
         }
         response = request.patch(uri);
-        response.prettyPrint();
+        response.then().log().all();
         scenario.attach(response.then().extract().body().asPrettyString(), "text/plain", "response");
     }
 
@@ -152,7 +152,7 @@ public class APITests {
         request.header("Content-Type", "application/json");
         request.body(requestBody);
         response = request.post(uri);
-        response.prettyPrint();
+        response.then().log().all();
         scenario.attach(response.then().extract().body().asPrettyString(), "text/plain", "response");
     }
 
@@ -178,7 +178,7 @@ public class APITests {
     public void user_deletes() {
         request.header("auth-token", authToken);
         response = request.delete(uri);
-        response.prettyPrint();
+        response.then().log().all();
         scenario.attach(response.then().extract().body().asPrettyString(), "text/plain", "response");
     }
 
