@@ -2,12 +2,14 @@ package com.cinqd.stepdefs;
 
 import com.cinqd.utils.database.MongoDBConnection;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.result.DeleteResult;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.*;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import io.cucumber.java.eo.Do;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
@@ -67,8 +69,8 @@ public class APITests {
             mongoDBConnection.deleteRecord("businesses", businessName);
             System.out.println("Business is deleted successfully: "  + businessName);
         } else if (scenarioName.contains("user")){
-            mongoDBConnection.deleteRecord("users", email);
-            System.out.println("User is deleted successfully: "  + email);
+            boolean flag = mongoDBConnection.deleteRecord("users", email);
+            Assert.assertTrue(flag);
         }
     }
 
@@ -318,5 +320,13 @@ public class APITests {
         }
         Document result = collection.find(searchQuery).first();
         Assert.assertNotNull(result);
+    }
+
+    @Then("db shows no record for that user")
+    public void db_shows_no_record_for_that_user() {
+        collection = mongoDBConnection.getCollection("users");
+        searchQuery = new Document("Email", email);
+        Document res = collection.find(searchQuery).first();
+        Assert.assertNull(res);
     }
 }

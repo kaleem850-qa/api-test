@@ -43,3 +43,4 @@ Feature: In order to consume API for after signup users
     Given user has a delete endpoint
     When user deletes
     Then user sees 200 response code
+    And db shows no record for that user

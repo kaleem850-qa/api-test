@@ -4,6 +4,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.result.DeleteResult;
 import org.bson.Document;
 
 import java.util.List;
@@ -25,13 +26,14 @@ public class MongoDBConnection {
         return database.getCollection(collectionName);
     }
 
-    public void deleteRecord(String collection, String uniqueKEY) {
+    public boolean deleteRecord(String collection, String uniqueKEY) {
         if (collection.contains("users")){
             filter = new Document("Email", uniqueKEY);
         } else if (collection.contains("businesses")){
             filter = new Document("generalInformation.businessName", uniqueKEY);
         }
-        getCollection(collection).deleteOne(filter);
+        DeleteResult flag = getCollection(collection).deleteOne(filter);
+        return flag.wasAcknowledged();
     }
 
     public List<Document> findAllDocuments(String collectionName) {
