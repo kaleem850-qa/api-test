@@ -38,6 +38,9 @@ public class APITests {
     MongoCollection<Document> collection;
     Document searchQuery;
     String businessName;
+    static String businessId;
+    static String crn;
+    static String employeeid;
 
     @BeforeAll
     public static void before_all(){
@@ -51,6 +54,7 @@ public class APITests {
     @Before
     public void setUp(Scenario scenario) {
         email = "test_" + UUID.randomUUID() + "@cinqd.com";
+        crn = "98765432";
 
         request = RestAssured.given().log().all();
         this.scenario = scenario;
@@ -83,7 +87,15 @@ public class APITests {
     public void userHasAnEndpoint(String endPoint) {
         if (endPoint.contains("auth")){
             uri = userBaseUrl + endPoint;
-        }else if (endPoint.contains("setup")){
+        }else if (endPoint.contains("setup")) {
+            if (endPoint.contains("get-business-by-id") || endPoint.contains("get-my-businesses")) {
+                uri = businessBaseUrl + endPoint + businessId;
+            } else if (endPoint.contains("get-business-by-CRN")){
+                uri = businessBaseUrl + endPoint + crn;
+            } else {
+                uri = businessBaseUrl + endPoint;
+            }
+        } else if(endPoint.contains("invites/create-invitation")) {
             uri = businessBaseUrl + endPoint;
         }
     }
@@ -172,9 +184,8 @@ public class APITests {
     }
 
     @Given("user has a delete endpoint")
-    public void user_has_a_delete_endpoint() {
+    public void user_has_a_delete_endpoint(){
         uri = userBaseUrl + "/auth/delete-user/"+ userId;
-
     }
     @When("user deletes")
     public void user_deletes() {
@@ -217,7 +228,7 @@ public class APITests {
                 .put("registeredOffice", "789 Registered Office St, Finance City, USA");
 
         JSONObject requestBody = new JSONObject()
-                .put("crn", "1234567")
+                .put("crn", crn)
                 .put("ownerId", userId)
                 .put("businessType", "ltd")
                 .put("businessImage", "")
@@ -328,5 +339,45 @@ public class APITests {
         searchQuery = new Document("Email", email);
         Document res = collection.find(searchQuery).first();
         Assert.assertNull(res);
+    }
+
+    @Then("user saves the business id for upcoming APIs")
+    public void user_saves_the_business_id_for_upcoming_ap_is() {
+        businessId = response.jsonPath().getString("data._id");
+    }
+
+    @Given("user sets the auth-token in request")
+    public void user_sets_the_auth_token_in_request() {
+        request.header("auth-token", authToken);
+    }
+
+    @Then("reinitializing the request to remove all the previous headers")
+    public void reinitializing_the_request_to_remove_all_the_previous_headers() {
+        request = RestAssured.given().log().all();
+    }
+
+    @Given("the employee body is")
+    public void the_employee_body_is(String requestBody) {
+        this.requestBody = String.format(requestBody, businessId);
+    }
+
+    @And("user sets the Content-Type in request")
+    public void userSetsTheContentTypeInRequest() {
+        request.header("Content-Type", "application/json");
+    }
+
+    @And("user sets the body in request")
+    public void userSetsTheBodyInRequest() {
+        request.body(requestBody);
+    }
+
+    @When("user has a delete endpoint {string}")
+    public void userHasADeleteEndpoint(String endPoint) {
+        uri = businessBaseUrl + endPoint + userId;
+    }
+
+    @And("user saves the employeeid for upcoming APIs")
+    public void userSavesTheEmployeeidForUpcomingAPIs() {
+
     }
 }
