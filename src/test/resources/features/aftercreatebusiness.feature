@@ -1,4 +1,4 @@
-Feature: In order to consume API for businesses
+Feature: In order to consume API for businesses 2
 
   Background:
     Given user has an endpoint "/auth/sign-up"
@@ -50,11 +50,10 @@ Feature: In order to consume API for businesses
     When user makes a post request
     Then user sees 200 response code
     And user saves the employeeid for upcoming APIs
-    When user has a delete endpoint "/setup/delete-user-from-business/"
     Examples:
       | Email             | firstName | lastName | businessId |
-      | aqdwwad@wdawd.com | abc       | xyz      | %s         |
-      | test@wdawd.com    | abc       | xyz      | %s         |
+      | %s | abc       | xyz      | %s         |
+     # | test@wdawd.com    | abc       | xyz      | %s         |
 
     Scenario: Get business by CRN
       Given user has an endpoint "/setup/get-business-by-CRN/"

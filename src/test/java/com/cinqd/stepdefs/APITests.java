@@ -2,14 +2,12 @@ package com.cinqd.stepdefs;
 
 import com.cinqd.utils.database.MongoDBConnection;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.result.DeleteResult;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.*;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import io.cucumber.java.eo.Do;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
@@ -17,6 +15,8 @@ import org.bson.Document;
 import org.json.JSONObject;
 import org.junit.Assert;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
@@ -34,13 +34,15 @@ public class APITests {
     static String connectionString;
     static String databaseName;
     static MongoDBConnection mongoDBConnection;
-    static String email;
+    static String userEmail;
     MongoCollection<Document> collection;
     Document searchQuery;
     String businessName;
     static String businessId;
     static String crn;
-    static String employeeid;
+    static String employeeId;
+    static String empEmail;
+    static String teamName;
 
     @BeforeAll
     public static void before_all(){
@@ -53,8 +55,10 @@ public class APITests {
 
     @Before
     public void setUp(Scenario scenario) {
-        email = "test_" + UUID.randomUUID() + "@cinqd.com";
-        crn = "98765432";
+        userEmail = "test_" + UUID.randomUUID() + "@cinqd.com";
+        empEmail = "test_" + UUID.randomUUID() + "@cinqd.com";
+        crn = "14602507";
+        teamName = "Team " + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
 
         request = RestAssured.given().log().all();
         this.scenario = scenario;
@@ -65,16 +69,28 @@ public class APITests {
         String scenarioName = scenario.getName();
         System.out.println("Scenario Name is: " +scenarioName);
         if (scenarioName.contains("user") && scenario.getName().contains("business")) {
-            mongoDBConnection.deleteRecord("users", email);
-            System.out.println("User is deleted successfully: " + email);
+            mongoDBConnection.deleteRecord("users", userEmail);
+            System.out.println("User is deleted successfully: " + userEmail + "   " + userId);
             mongoDBConnection.deleteRecord("businesses", businessName);
-            System.out.println("Business is deleted successfully: "  + businessName);
+            System.out.println("Business is deleted successfully: "  + businessName + "   " + businessId);
         } else if (scenarioName.contains("business")){
             mongoDBConnection.deleteRecord("businesses", businessName);
             System.out.println("Business is deleted successfully: "  + businessName);
         } else if (scenarioName.contains("user")){
-            boolean flag = mongoDBConnection.deleteRecord("users", email);
+            boolean flag = mongoDBConnection.deleteRecord("users", userEmail + "   " + userId);
             Assert.assertTrue(flag);
+            System.out.println("User is deleted successfully: " + userEmail + "   " + userId);
+        }
+
+        if (scenarioName.contains("employee")){
+            boolean flag = mongoDBConnection.deleteRecord("users", empEmail);
+            Assert.assertTrue(flag);
+            System.out.println("Employee is deleted successfully: " + empEmail + "   " + employeeId);
+        }
+        if (scenarioName.contains("team")){
+            boolean flag = mongoDBConnection.deleteRecord("teams", teamName);
+            Assert.assertTrue(flag);
+            System.out.println("Team is deleted successfully: " + teamName);
         }
     }
 
@@ -88,14 +104,18 @@ public class APITests {
         if (endPoint.contains("auth")){
             uri = userBaseUrl + endPoint;
         }else if (endPoint.contains("setup")) {
-            if (endPoint.contains("get-business-by-id") || endPoint.contains("get-my-businesses")) {
+            if (endPoint.contains("get-business-by-id") || endPoint.contains("get-business-employees")) {
                 uri = businessBaseUrl + endPoint + businessId;
             } else if (endPoint.contains("get-business-by-CRN")){
                 uri = businessBaseUrl + endPoint + crn;
+            } else if (endPoint.contains("get-my-businesses")){
+                uri = businessBaseUrl + endPoint + userId;
+            } else if (endPoint.contains("get-user-by-id")){
+                uri = businessBaseUrl + endPoint + employeeId;
             } else {
                 uri = businessBaseUrl + endPoint;
             }
-        } else if(endPoint.contains("invites/create-invitation")) {
+        } else if(endPoint.contains("invites/create-invitation") || endPoint.contains("team")) {
             uri = businessBaseUrl + endPoint;
         }
     }
@@ -114,7 +134,7 @@ public class APITests {
     public void setRequestBody(String firstName, String lastName, String password, String signupType) {
         requestBody = String.format(
                 "{\"firstName\": \"%s\", \"lastName\": \"%s\", \"Password\": \"%s\", \"Email\": \"%s\", \"SignupType\": \"%s\"}",
-                firstName, lastName, password, email, signupType
+                firstName, lastName, password, userEmail, signupType
         );
         request.header("Content-Type", "application/json");
         request.body(requestBody);
@@ -149,7 +169,7 @@ public class APITests {
     @When("user makes a patch request for {string}")
     public void user_makes_a_patch_request_for(String endPoint) {
         if (endPoint.contains("activate-user")) {
-            uri = userBaseUrl + endPoint + email;
+            uri = userBaseUrl + endPoint + userEmail;
         } else if (endPoint.contains("recover-password")){
             uri = userBaseUrl + endPoint;
         }
@@ -162,7 +182,7 @@ public class APITests {
     public void user_makes_a_post_request_for(String signInEndPoint, String password) {
         uri = userBaseUrl + signInEndPoint;
         requestBody = String.format(
-                "{\"Email\": \"%s\",\"Password\": \"%s\"}", email, password);
+                "{\"Email\": \"%s\",\"Password\": \"%s\"}", userEmail, password);
         request.header("Content-Type", "application/json");
         request.body(requestBody);
         response = request.post(uri);
@@ -323,7 +343,7 @@ public class APITests {
     public void mongo_db_entry_for_user_is_created() {
         if (uri.contains("auth")) {
             collection = mongoDBConnection.getCollection("users");
-            searchQuery = new Document("Email", email);
+            searchQuery = new Document("Email", userEmail);
 
         } else if (uri.contains("setup")) {
             collection = mongoDBConnection.getCollection("businesses");
@@ -336,7 +356,7 @@ public class APITests {
     @Then("db shows no record for that user")
     public void db_shows_no_record_for_that_user() {
         collection = mongoDBConnection.getCollection("users");
-        searchQuery = new Document("Email", email);
+        searchQuery = new Document("Email", userEmail);
         Document res = collection.find(searchQuery).first();
         Assert.assertNull(res);
     }
@@ -358,7 +378,7 @@ public class APITests {
 
     @Given("the employee body is")
     public void the_employee_body_is(String requestBody) {
-        this.requestBody = String.format(requestBody, businessId);
+        this.requestBody = String.format(requestBody, empEmail, businessId);
     }
 
     @And("user sets the Content-Type in request")
@@ -373,11 +393,44 @@ public class APITests {
 
     @When("user has a delete endpoint {string}")
     public void userHasADeleteEndpoint(String endPoint) {
-        uri = businessBaseUrl + endPoint + userId;
+        uri = businessBaseUrl + endPoint + employeeId;
     }
 
     @And("user saves the employeeid for upcoming APIs")
     public void userSavesTheEmployeeidForUpcomingAPIs() {
+        employeeId = response.jsonPath().getString("data._id");
+    }
+
+    @And("employee body is {string}, {string}, {string}, {string}")
+    public void employeeBodyIs(String firstName, String lastName, String password, String signupType) {
+        requestBody = String.format(
+                "{\"firstName\": \"%s\", \"lastName\": \"%s\", \"Password\": \"%s\", \"Email\": \"%s\", \"SignupType\": \"%s\", \"invitedBy\": \"%s\"}",
+                firstName, lastName, password, empEmail, signupType, employeeId
+        );
+        request.header("Content-Type", "application/json");
+        request.body(requestBody);
+    }
+
+    @When("employee makes a patch request for {string}")
+    public void employeeMakesAPatchRequestFor(String endPoint) {
+        uri = userBaseUrl + endPoint + empEmail;
+        response = request.patch(uri);
+        response.then().log().all();
+        scenario.attach(response.then().extract().body().asPrettyString(), "text/plain", "response");
+    }
+
+    @And("user sets the body for team")
+    public void userSetsTheBodyForTeam(String requestBody) {
+        this.requestBody = String.format(requestBody, teamName, employeeId, businessId);
+
+        request.body(this.requestBody);
+    }
+
+    @And("business has a team with name not null")
+    public void businessHasATeamWithNameNotNull() {
+        String actualTeamName = response.jsonPath().getString("data.name");
+        Assert.assertNotNull("Team name should not be null", actualTeamName);
+        System.out.println("Created Team Name: " + actualTeamName);
 
     }
 }
