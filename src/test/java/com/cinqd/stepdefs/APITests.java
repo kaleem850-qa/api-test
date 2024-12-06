@@ -53,6 +53,14 @@ public class APITests {
     static String groupName;
     static String groupNameEdit;
     static String groupId;
+    static String roleId;
+    static String roleName;
+    static String roleNameEdit;
+    static String rolePermissions;
+    static String roleDescription;
+    static String deptName;
+    static String deptId;
+    static String deptNameEdit;
 
     @BeforeAll
     public static void before_all(){
@@ -81,6 +89,14 @@ public class APITests {
 
         groupName = "group_" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
         groupNameEdit = "test_group_" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+
+        roleName = "role_" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        roleNameEdit = "test_role_" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        roleDescription = "roleDescription_" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        rolePermissions = "rolePermissions_" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+
+        deptName = "deptName_" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        deptNameEdit = "test_deptName_" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
 
         request = RestAssured.given().log().all();
         this.scenario = scenario;
@@ -124,6 +140,16 @@ public class APITests {
             //Assert.assertTrue(flag);
             System.out.println("group is deleted successfully: " + groupName + "   " + groupId);
         }
+        if (scenarioName.contains("roles")){
+            //boolean flag = mongoDBConnection.deleteRecord("roles", roleId);
+            //Assert.assertTrue(flag);
+            System.out.println("role is deleted successfully: " + roleName + "   " + roleId);
+        }
+        if (scenarioName.contains("department")){
+            //boolean flag = mongoDBConnection.deleteRecord("departments", deptId);
+            //Assert.assertTrue(flag);
+            System.out.println("department is deleted successfully: " + deptName + "   " + deptId);
+        }
     }
 
     @AfterAll
@@ -147,16 +173,34 @@ public class APITests {
             } else {
                 uri = businessBaseUrl + endPoint;
             }
-        } else if(endPoint.contains("invites/create-invitation") || endPoint.contains("create-team") || endPoint.contains("create-branch") || endPoint.contains("create-group")) {
+        } else if(endPoint.contains("invites/create-invitation") ||
+                    endPoint.contains("create-team") ||
+                    endPoint.contains("create-branch") ||
+                    endPoint.contains("create-group") ||
+                    endPoint.contains("create-role") ||
+                    endPoint.contains("create-department")) {
             uri = businessBaseUrl + endPoint;
-        } else if (endPoint.contains("get-team-by-id") || endPoint.contains("edit-team") || endPoint.contains("delete-team")) {
+        } else if (endPoint.contains("get-team-by-id") ||
+                    endPoint.contains("edit-team") ||
+                    endPoint.contains("delete-team")) {
             uri = businessBaseUrl + endPoint + teamId;
-        } else if (endPoint.contains("get-teams-by-business")  || endPoint.contains("get-branches-by-business") || endPoint.contains("get-groups-by-business")) {
+        } else if (endPoint.contains("get-teams-by-business") ||
+                    endPoint.contains("get-branches-by-business") ||
+                    endPoint.contains("get-groups-by-business") ||
+                    endPoint.contains("get-departments-by-business")) {
             uri = businessBaseUrl + endPoint + businessId;
-        } else if (endPoint.contains("edit-branch") || endPoint.contains("get-branch-by-id")  || endPoint.contains("delete-branch")) {
+        } else if (endPoint.contains("edit-branch") ||
+                    endPoint.contains("get-branch-by-id")  ||
+                    endPoint.contains("delete-branch")) {
             uri = businessBaseUrl + endPoint + branchId;
-        } else if (endPoint.contains("edit-group") || endPoint.contains("get-group-by-id") || endPoint.contains("delete-group")) {
+        } else if (endPoint.contains("edit-group") ||
+                    endPoint.contains("get-group-by-id") ||
+                    endPoint.contains("delete-group")) {
             uri = businessBaseUrl + endPoint + groupId;
+        } else if (endPoint.contains("get-department-by-id") ||
+                    endPoint.contains("delete-department") ||
+                    endPoint.contains("edit-department")) {
+            uri = businessBaseUrl + endPoint + deptId;
         }
     }
 
@@ -535,5 +579,33 @@ public class APITests {
     @And("user saves the group_id for upcoming APIs")
     public void userSavesTheGroup_idForUpcomingAPIs() {
         groupId = response.jsonPath().getString("data._id");
+    }
+
+    @And("user sets the body for roles")
+    public void userSetsTheBodyForRoles(String requestBody) {
+        this.requestBody = String.format(requestBody, roleName, businessId, rolePermissions, roleDescription);
+        request.body(this.requestBody);
+    }
+
+    @And("user saves the role_id for upcoming APIs")
+    public void userSavesTheRole_idForUpcomingAPIs() {
+        roleId = response.jsonPath().getString("data._id");
+    }
+
+    @And("user sets the body for department")
+    public void userSetsTheBodyForDepartment(String requestBody) {
+        this.requestBody = String.format(requestBody, deptName, employeeId, businessId);
+        request.body(this.requestBody);
+    }
+
+    @And("user saves the dept_id for upcoming APIs")
+    public void userSavesTheDept_idForUpcomingAPIs() {
+        deptId = response.jsonPath().getString("data._id");
+    }
+
+    @And("user sets the edit body for department")
+    public void userSetsTheEditBodyForDepartment(String requestBody) {
+        this.requestBody = String.format(requestBody, deptNameEdit, employeeId, businessId);
+        request.body(this.requestBody);
     }
 }
