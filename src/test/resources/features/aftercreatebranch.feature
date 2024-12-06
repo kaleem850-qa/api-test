@@ -1,4 +1,4 @@
-Feature: In order to consume API for businesses 3
+Feature: In order to get branch by id and business and delete them
 
   Background:
     Given user has an endpoint "/auth/sign-up"
@@ -43,41 +43,54 @@ Feature: In order to consume API for businesses 3
     When employee makes a patch request for "/auth/activate-user/"
     Then user sees 200 response code
     And reinitializing the request to remove all the previous headers
-#    When user has a delete endpoint "/setup/delete-user-from-business/"
-#    And user deletes
-#    Then user sees 200 response code
-
-  Scenario: Getting user business employee by id
-    Given user has an endpoint "/setup/get-user-by-id/"
-    And user sets the auth-token in request
-    When user makes a get request
-    Then user sees 200 response code
-
-  Scenario: Get user business employee
-    Given user has an endpoint "/setup/get-business-employees/"
-    And user sets the auth-token in request
-    When user makes a get request
-    Then user sees 200 response code
-
-  Scenario Outline: user creates a team inside a business with an employee
-    Given user has an endpoint "/team/create-team"
+    Given user has an endpoint "/branch/create-branch/"
     And user sets the auth-token in request
     And user sets the Content-Type in request
-    And user sets the body for team
-  """
-  {
-  "name": "<name>",
-  "employees": ["<employees>"],
-  "business": "<business>"
-  }
-  """
+    And user sets the body for branch
+    """
+      {
+        "name":"%s",
+        "employees":["%s"],
+        "business":"%s",
+        "address":"%s"
+      }
+    """
     When user makes a post request
     Then user sees 200 response code
-    And business has a team with name not null
+    And user saves the branch_id for upcoming APIs
+    And reinitializing the request to remove all the previous headers
 
-    Examples:
-      | name | employees | business |
-      | %s   | %s        | %s       |
-      |      | %s        | %s       |
+  Scenario: Edit branch (for user that created a business with an employee)
+    Given user has an endpoint "/branch/edit-branch/"
+    And user sets the Content-Type in request
+    And user sets the auth-token in request
+    And user sets the edit body for branch
+    """
+      {
+        "name":"%s",
+        "employees":["%s"],
+        "business":"%s",
+        "address":"%s"
+      }
+    """
+    When user makes a patch request
+    Then user sees 200 response code
+    
+  Scenario: Get branch by business id (for user that created a business with an employee)
+    Given user has an endpoint "/branch/get-branches-by-business/"
+    And user sets the auth-token in request
+    When user makes a get request
+    Then user sees 200 response code
 
+  Scenario: Get branch by branch Id (for user that created a business with an employee)
+    Given user has an endpoint "/branch/get-branch-by-id/"
+    And user sets the auth-token in request
+    When user makes a get request
+    Then user sees 200 response code
+
+  Scenario: Delete branch (for user that created a business with an employee)
+    Given user has an endpoint "/branch/delete-branch/"
+    And user sets the auth-token in request
+    When user makes a delete request
+    Then user sees 200 response code
 

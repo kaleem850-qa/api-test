@@ -1,4 +1,4 @@
-Feature: In order to consume API for businesses 3
+Feature: In order to do scenarios in business > Create Team
 
   Background:
     Given user has an endpoint "/auth/sign-up"
@@ -43,41 +43,53 @@ Feature: In order to consume API for businesses 3
     When employee makes a patch request for "/auth/activate-user/"
     Then user sees 200 response code
     And reinitializing the request to remove all the previous headers
-#    When user has a delete endpoint "/setup/delete-user-from-business/"
-#    And user deletes
-#    Then user sees 200 response code
-
-  Scenario: Getting user business employee by id
-    Given user has an endpoint "/setup/get-user-by-id/"
-    And user sets the auth-token in request
-    When user makes a get request
-    Then user sees 200 response code
-
-  Scenario: Get user business employee
-    Given user has an endpoint "/setup/get-business-employees/"
-    And user sets the auth-token in request
-    When user makes a get request
-    Then user sees 200 response code
-
-  Scenario Outline: user creates a team inside a business with an employee
     Given user has an endpoint "/team/create-team"
     And user sets the auth-token in request
     And user sets the Content-Type in request
     And user sets the body for team
   """
   {
-  "name": "<name>",
-  "employees": ["<employees>"],
-  "business": "<business>"
+  "name": "%s",
+  "employees": ["%s"],
+  "business": "%s"
   }
   """
     When user makes a post request
     Then user sees 200 response code
     And business has a team with name not null
+    And user saves the team_id for upcoming APIs
+    And reinitializing the request to remove all the previous headers
 
-    Examples:
-      | name | employees | business |
-      | %s   | %s        | %s       |
-      |      | %s        | %s       |
+  Scenario: Get team by id (for user that created a business with an employee)
+    Given user has an endpoint "/team/get-team-by-id/"
+    And user sets the auth-token in request
+    When user makes a get request
+    Then user sees 200 response code
 
+  Scenario: Get team by business (for user that created a business with an employee)
+    Given user has an endpoint "/team/get-teams-by-business/"
+    And user sets the auth-token in request
+    When user makes a get request
+    Then user sees 200 response code
+
+  Scenario: Edit team (for user that created a business with an employee)
+    Given user has an endpoint "/team/edit-team/"
+    And user sets the auth-token in request
+    And user sets the Content-Type in request
+    And user edits the body for team
+    """
+      {
+      "name": "%s",
+      "employees": ["%s"],
+      "business": "%s"
+      }
+    """
+    When user makes a patch request
+    Then user sees 200 response code
+
+  Scenario: Delete team (for user that created a business with an employee)
+    Given user has an endpoint "/team/delete-team/"
+    And user sets the auth-token in request
+    When user makes a delete request
+    Then user sees 200 response code
 

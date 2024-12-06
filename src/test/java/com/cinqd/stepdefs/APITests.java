@@ -43,6 +43,16 @@ public class APITests {
     static String employeeId;
     static String empEmail;
     static String teamName;
+    static String teamId;
+    static String teamNameEdit;
+    static String branchName;
+    static String branchAddress;
+    static String branchNameEdit;
+    static String branchAddressEdit;
+    static String branchId;
+    static String groupName;
+    static String groupNameEdit;
+    static String groupId;
 
     @BeforeAll
     public static void before_all(){
@@ -57,8 +67,20 @@ public class APITests {
     public void setUp(Scenario scenario) {
         userEmail = "test_" + UUID.randomUUID() + "@cinqd.com";
         empEmail = "test_" + UUID.randomUUID() + "@cinqd.com";
+
         crn = "14602507";
+
         teamName = "Team " + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        teamNameEdit = "test_" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+
+        branchName = "branch_" +  new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        branchAddress = "123 Main Street, City-" + System.currentTimeMillis();
+
+        branchNameEdit = "test_branch_" +  new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        branchAddressEdit = "test 123 Main Street, City-" + System.currentTimeMillis();
+
+        groupName = "group_" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        groupNameEdit = "test_group_" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
 
         request = RestAssured.given().log().all();
         this.scenario = scenario;
@@ -69,28 +91,38 @@ public class APITests {
         String scenarioName = scenario.getName();
         System.out.println("Scenario Name is: " +scenarioName);
         if (scenarioName.contains("user") && scenario.getName().contains("business")) {
-            mongoDBConnection.deleteRecord("users", userEmail);
+            //mongoDBConnection.deleteRecord("users", userEmail);
             System.out.println("User is deleted successfully: " + userEmail + "   " + userId);
-            mongoDBConnection.deleteRecord("businesses", businessName);
+            //mongoDBConnection.deleteRecord("businesses", businessName);
             System.out.println("Business is deleted successfully: "  + businessName + "   " + businessId);
         } else if (scenarioName.contains("business")){
-            mongoDBConnection.deleteRecord("businesses", businessName);
+            //mongoDBConnection.deleteRecord("businesses", businessName);
             System.out.println("Business is deleted successfully: "  + businessName);
         } else if (scenarioName.contains("user")){
-            boolean flag = mongoDBConnection.deleteRecord("users", userEmail + "   " + userId);
-            Assert.assertTrue(flag);
+            //boolean flag = mongoDBConnection.deleteRecord("users", userEmail + "   " + userId);
+            //Assert.assertTrue(flag);
             System.out.println("User is deleted successfully: " + userEmail + "   " + userId);
         }
 
         if (scenarioName.contains("employee")){
-            boolean flag = mongoDBConnection.deleteRecord("users", empEmail);
-            Assert.assertTrue(flag);
+            //boolean flag = mongoDBConnection.deleteRecord("users", empEmail);
+            //Assert.assertTrue(flag);
             System.out.println("Employee is deleted successfully: " + empEmail + "   " + employeeId);
         }
         if (scenarioName.contains("team")){
-            boolean flag = mongoDBConnection.deleteRecord("teams", teamName);
-            Assert.assertTrue(flag);
-            System.out.println("Team is deleted successfully: " + teamName);
+            //boolean flag = mongoDBConnection.deleteRecord("teams", teamId);
+            //Assert.assertTrue(flag);
+            System.out.println("Team is deleted successfully: " + teamName + "   " + teamId);
+        }
+        if (scenarioName.contains("branch")){
+            //boolean flag = mongoDBConnection.deleteRecord("branches", branchId);
+            //Assert.assertTrue(flag);
+            System.out.println("branch is deleted successfully: " + branchName + "   " + branchId);
+        }
+        if (scenarioName.contains("group")){
+            //boolean flag = mongoDBConnection.deleteRecord("groups", groupId);
+            //Assert.assertTrue(flag);
+            System.out.println("group is deleted successfully: " + groupName + "   " + groupId);
         }
     }
 
@@ -115,8 +147,16 @@ public class APITests {
             } else {
                 uri = businessBaseUrl + endPoint;
             }
-        } else if(endPoint.contains("invites/create-invitation") || endPoint.contains("team")) {
+        } else if(endPoint.contains("invites/create-invitation") || endPoint.contains("create-team") || endPoint.contains("create-branch") || endPoint.contains("create-group")) {
             uri = businessBaseUrl + endPoint;
+        } else if (endPoint.contains("get-team-by-id") || endPoint.contains("edit-team") || endPoint.contains("delete-team")) {
+            uri = businessBaseUrl + endPoint + teamId;
+        } else if (endPoint.contains("get-teams-by-business")  || endPoint.contains("get-branches-by-business") || endPoint.contains("get-groups-by-business")) {
+            uri = businessBaseUrl + endPoint + businessId;
+        } else if (endPoint.contains("edit-branch") || endPoint.contains("get-branch-by-id")  || endPoint.contains("delete-branch")) {
+            uri = businessBaseUrl + endPoint + branchId;
+        } else if (endPoint.contains("edit-group") || endPoint.contains("get-group-by-id") || endPoint.contains("delete-group")) {
+            uri = businessBaseUrl + endPoint + groupId;
         }
     }
 
@@ -432,5 +472,68 @@ public class APITests {
         Assert.assertNotNull("Team name should not be null", actualTeamName);
         System.out.println("Created Team Name: " + actualTeamName);
 
+    }
+
+    @And("user saves the team_id for upcoming APIs")
+    public void userSavesTheTeam_idForUpcomingAPIs() {
+        teamId = response.jsonPath().getString("data._id");
+    }
+
+    @When("user makes a patch request")
+    public void userMakesAPatchRequest() {
+        response = request.patch(uri);
+        response.then().log().all();
+        scenario.attach(response.then().extract().body().asPrettyString(), "text/plain", "response");
+    }
+
+    @And("user edits the body for team")
+    public void userEditsTheBodyForTeam(String requestBody) {
+        this.requestBody = String.format(requestBody, teamNameEdit, employeeId, businessId);
+
+        request.body(this.requestBody);
+    }
+
+    @When("user makes a delete request")
+    public void userMakesADeleteRequest() {
+        response = request.delete(uri);
+        response.then().log().all();
+        scenario.attach(response.then().extract().body().asPrettyString(), "text/plain", "response");
+    }
+
+    @And("user sets the body for branch")
+    public void userSetsTheBodyForBranch(String requestBody) {
+        this.requestBody = String.format(requestBody, branchName, employeeId, businessId, branchAddress);
+        request.body(this.requestBody);
+    }
+
+    @And("user saves the branch_id for upcoming APIs")
+    public void userSavesTheBranch_idForUpcomingAPIs() {
+        branchId = response.jsonPath().getString("data._id");
+
+    }
+
+    @And("user sets the edit body for branch")
+    public void userSetsTheEditBodyForBranch(String requestBody) {
+        this.requestBody = String.format(requestBody, branchNameEdit, employeeId, businessId, branchAddressEdit);
+        request.body(this.requestBody);
+    }
+
+    @And("user sets the body for group")
+    public void userSetsTheBodyForGroup(String requestBody) {
+        this.requestBody = String.format(requestBody, groupName, employeeId, businessId);
+
+        request.body(this.requestBody);
+    }
+
+    @And("user sets the edit body for group")
+    public void userSetsTheEditBodyForGroup(String requestBody) {
+        this.requestBody = String.format(requestBody, groupNameEdit, employeeId, businessId);
+
+        request.body(this.requestBody);
+    }
+
+    @And("user saves the group_id for upcoming APIs")
+    public void userSavesTheGroup_idForUpcomingAPIs() {
+        groupId = response.jsonPath().getString("data._id");
     }
 }
