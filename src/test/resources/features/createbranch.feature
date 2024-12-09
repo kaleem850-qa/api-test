@@ -44,6 +44,7 @@ Feature: In order to create branch in the business for the user
     Then user sees 200 response code
     And reinitializing the request to remove all the previous headers
 
+  @new
   Scenario Outline: Creating Branch (for user that created a business with an employee)
     Given user has an endpoint "/branch/create-branch/"
     And user sets the auth-token in request

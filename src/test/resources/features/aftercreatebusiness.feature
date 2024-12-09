@@ -19,18 +19,21 @@ Feature: In order to consume API for businesses 2
     And user saves the business id for upcoming APIs
     And reinitializing the request to remove all the previous headers
 
+  @new
   Scenario: Get businesses by id
     Given user has an endpoint "/setup/get-business-by-id/"
     And user sets the auth-token in request
     When user makes a get request
     Then user sees 200 response code
 
+  @new
   Scenario: Get all my businesses
     Given user has an endpoint "/setup/get-my-businesses/"
     And user sets the auth-token in request
     When user makes a get request
     Then user sees 200 response code
 
+  @new
   Scenario Outline: Create invitation to users/employees in a business
     Given user has an endpoint "/invites/create-invitation"
     And the employee body is
@@ -55,6 +58,7 @@ Feature: In order to consume API for businesses 2
       | %s | abc       | xyz      | %s         |
      # | test@wdawd.com    | abc       | xyz      | %s         |
 
+    @new
     Scenario: Get business by CRN
       Given user has an endpoint "/setup/get-business-by-CRN/"
       And user sets the auth-token in request

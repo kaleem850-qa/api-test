@@ -60,18 +60,21 @@ Feature: In order to do scenarios in business > Create Team
     And user saves the team_id for upcoming APIs
     And reinitializing the request to remove all the previous headers
 
+  @new
   Scenario: Get team by id (for user that created a business with an employee)
     Given user has an endpoint "/team/get-team-by-id/"
     And user sets the auth-token in request
     When user makes a get request
     Then user sees 200 response code
 
+  @new
   Scenario: Get team by business (for user that created a business with an employee)
     Given user has an endpoint "/team/get-teams-by-business/"
     And user sets the auth-token in request
     When user makes a get request
     Then user sees 200 response code
 
+  @new
   Scenario: Edit team (for user that created a business with an employee)
     Given user has an endpoint "/team/edit-team/"
     And user sets the auth-token in request
@@ -87,6 +90,7 @@ Feature: In order to do scenarios in business > Create Team
     When user makes a patch request
     Then user sees 200 response code
 
+  @new
   Scenario: Delete team (for user that created a business with an employee)
     Given user has an endpoint "/team/delete-team/"
     And user sets the auth-token in request

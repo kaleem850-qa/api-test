@@ -59,24 +59,28 @@ Feature: In order to
     And user saves the dept_id for upcoming APIs
     And reinitializing the request to remove all the previous headers
 
+  @new
   Scenario: Get department by id (for user that created a business with an employee)
     Given user has an endpoint "/department/get-department-by-id/"
     And user sets the auth-token in request
     When user makes a get request
     Then user sees 200 response code
-    
+
+  @new
   Scenario: Get department by business (for user that created a business with an employee)
     Given user has an endpoint "/department/get-departments-by-business/"
     And user sets the auth-token in request
     When user makes a get request
     Then user sees 200 response code
 
+  @new
   Scenario: Delete department (for user that created a business with an employee)
     Given user has an endpoint "/department/delete-department/"
     And user sets the auth-token in request
     When user makes a delete request
     Then user sees 200 response code
 
+  @new
   Scenario: Edit department (for user that created a business with an employee)
     Given user has an endpoint "/department/edit-department/"
     And user sets the auth-token in request
@@ -90,4 +94,11 @@ Feature: In order to
       }
     """
     When user makes a patch request
+    Then user sees 200 response code
+
+  @new
+  Scenario: Delete department (for user that created a business with an employee)
+    Given user has an endpoint "/department/delete-department/"
+    And user sets the auth-token in request
+    When user makes a delete request
     Then user sees 200 response code

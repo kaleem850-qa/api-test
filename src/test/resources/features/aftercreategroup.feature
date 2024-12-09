@@ -59,7 +59,8 @@ Feature: In order to
     And user saves the group_id for upcoming APIs
     And reinitializing the request to remove all the previous headers
 
-    Scenario: Edit group (for user that created a business with an employee)
+  @new
+  Scenario: Edit group (for user that created a business with an employee)
       Given user has an endpoint "/group/edit-group/"
       And user sets the Content-Type in request
       And user sets the auth-token in request
@@ -74,19 +75,22 @@ Feature: In order to
       When user makes a patch request
       Then user sees 200 response code
 
-    Scenario: Get group by id (for user that created a business with an employee)
+  @new
+  Scenario: Get group by id (for user that created a business with an employee)
       Given user has an endpoint "/group/get-group-by-id/"
       And user sets the auth-token in request
       When user makes a get request
       Then user sees 200 response code
 
-    Scenario: Get group by business (for user that created a business with an employee)
+  @new
+  Scenario: Get group by business (for user that created a business with an employee)
       Given user has an endpoint "/group/get-groups-by-business/"
       And user sets the auth-token in request
       When user makes a get request
       Then user sees 200 response code
 
-    Scenario: Delete group (for user that created a business with an employee)
+  @new
+  Scenario: Delete group (for user that created a business with an employee)
       Given user has an endpoint "/group/delete-group/"
       And user sets the auth-token in request
       When user makes a delete request

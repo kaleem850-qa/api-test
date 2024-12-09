@@ -60,6 +60,7 @@ Feature: In order to get branch by id and business and delete them
     And user saves the branch_id for upcoming APIs
     And reinitializing the request to remove all the previous headers
 
+    @new
   Scenario: Edit branch (for user that created a business with an employee)
     Given user has an endpoint "/branch/edit-branch/"
     And user sets the Content-Type in request
@@ -75,22 +76,24 @@ Feature: In order to get branch by id and business and delete them
     """
     When user makes a patch request
     Then user sees 200 response code
-    
+
+  @new
   Scenario: Get branch by business id (for user that created a business with an employee)
     Given user has an endpoint "/branch/get-branches-by-business/"
     And user sets the auth-token in request
     When user makes a get request
     Then user sees 200 response code
 
+  @new
   Scenario: Get branch by branch Id (for user that created a business with an employee)
     Given user has an endpoint "/branch/get-branch-by-id/"
     And user sets the auth-token in request
     When user makes a get request
     Then user sees 200 response code
 
+  @new
   Scenario: Delete branch (for user that created a business with an employee)
     Given user has an endpoint "/branch/delete-branch/"
     And user sets the auth-token in request
     When user makes a delete request
     Then user sees 200 response code
-

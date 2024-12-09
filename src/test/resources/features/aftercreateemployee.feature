@@ -47,18 +47,21 @@ Feature: In order to consume API for businesses 3
 #    And user deletes
 #    Then user sees 200 response code
 
+  @new
   Scenario: Getting user business employee by id
     Given user has an endpoint "/setup/get-user-by-id/"
     And user sets the auth-token in request
     When user makes a get request
     Then user sees 200 response code
 
+  @new
   Scenario: Get user business employee
     Given user has an endpoint "/setup/get-business-employees/"
     And user sets the auth-token in request
     When user makes a get request
     Then user sees 200 response code
 
+  @new
   Scenario Outline: user creates a team inside a business with an employee
     Given user has an endpoint "/team/create-team"
     And user sets the auth-token in request
@@ -79,5 +82,3 @@ Feature: In order to consume API for businesses 3
       | name | employees | business |
       | %s   | %s        | %s       |
       |      | %s        | %s       |
-
-
